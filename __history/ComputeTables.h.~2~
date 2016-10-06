@@ -1,0 +1,13 @@
+#ifnedf COMPUTETABLES_H
+#define COMPUTETABLES_H
+
+class ComputeTables
+{
+public:
+	friend class CreateTables;
+
+private:
+
+};
+
+#endif

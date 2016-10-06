@@ -1,0 +1,20 @@
+#ifndef CREATETABLES_CPP
+#define CREATETABLES_CPP
+
+class CreateTables
+{
+	public:
+	// Конструкторы
+	CreateTables(TForm *);
+	CreateTables(int Alternatives , int Criteria);
+
+	void AddToPageControl(TPageControl *);
+
+	~CreateTables();
+
+	private:
+	int  alternatives;
+	int  criteria;
+};
+
+#endif

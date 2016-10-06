@@ -1,0 +1,14 @@
+#ifndef CREATETABLES_H
+#define CREATETABLES_H
+
+#include "CreateAndComputeTables.h"
+#include <time.h>
+#include <vector>
+#include <algorithm>
+
+using std::max;
+using std::vector;
+
+void CreateAndComputeTables
+
+#endif

@@ -1,0 +1,31 @@
+#ifnedf COMPUTETABLES_H
+#define COMPUTETABLES_H
+
+#include <vector>
+using std::vector;
+
+class ComputeTables
+{
+public:
+	friend class CreateTables;
+	friend class DataForTabels;
+
+	ComputeTables() {}
+
+	void runCompute()
+	{
+
+    }
+
+private:
+	vector<double> localVectors;
+	vector<double> globalVectors;
+	vector<double> factorCoefficient;
+	double summa;
+	double totalFactor;
+
+	CreateTables *cTab;
+    DataForTabels *dft;
+};
+
+#endif

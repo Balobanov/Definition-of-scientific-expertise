@@ -1,0 +1,216 @@
+#ifndef CREATETABLES_H
+#define CREATETABLES_H
+
+#include "DataForTabels.h"
+//Класс Создает таблицы и размещает их в PageControl
+class CreateTables
+{
+public:
+	friend class DataForTabels;
+
+	CreateTables(){}
+
+	 ~CreateTables()
+	 {
+			 delete [] pages;
+			 delete [] strTables;
+	 }
+	 // Нажатие клавиши в Таблице
+	void __fastcall tableKeyPress(TObject *Sender, System::WideChar &Key)
+	 {
+		   if ((Key>='0')&&(Key<='9')) {;} // цифры
+		   else if (Key==8) {} // <-
+		   else
+			if ((Key=='/'))
+			{
+				Key = '/';
+			}
+			else Key = 0; // не цифра
+	 }
+
+	 // Создать таблицы
+bool createTables(DataForTabels *dft, TPageControl *pctrl)
+{
+			this->dft = dft;
+			pCtrl = pctrl;
+			strTables = new TStringGrid * [dft->getTableCount()];
+			pages = new TTabSheet * [dft->getTableCount()];
+
+
+//---------------------    СРАВНЕНИЕ АЛЬТЕРНАТИВ     ---------------------------
+
+			// Создаются таблицы для сравнения альтернатив по критерию
+			for(int i = 0; i < (dft->getTableCount()); i++)
+			{
+				pages[i] = new TTabSheet(pCtrl);
+				pages[i]->Caption = "Сравнение по критерию \"" + dft->getCriteriaName(i) + "\"";
+				pages[i]->PageControl = pCtrl;
+
+				strTables[i] = new TStringGrid(pages[i]);
+				strTables[i]->Left = 1;
+				strTables[i]->Top = 1;
+				strTables[i]->Width = pCtrl->Width-10;
+				strTables[i]->Height = 145;
+				strTables[i]->TabOrder = pCtrl->TabOrder  + i;
+				strTables[i]->Visible = true;
+				strTables[i]->ColCount = dft->getAlternativesCount() + 1; // матрица размером n на n
+				strTables[i]->RowCount = dft->getAlternativesCount() + 1; // альтернатив
+				strTables[i]->Options << goEditing;
+				strTables[i]->OnKeyPress = tableKeyPress;
+				strTables[i]->Parent = pages[i];
+			}
+
+			// Подпись фиксированых ячеек для таблиц "Сравнение по критерию"
+			// название альтернатив
+			for(int i = 0; i < dft->getTableCount(); i++){
+				for (int j = 1; j <= dft->getAlternativesCount(); j++)
+				{
+					 strTables[i]->Cells[j][0] = dft->getAlternativesName(j-1);
+					 strTables[i]->Cells[0][j] = dft->getAlternativesName(j-1);
+				}
+			}
+
+			// Заполнить главные диагонали матриц единицами "1"
+			for(int i = 0; i < dft->getTableCount(); i++)
+				for (int j = 1; j <= dft->getAlternativesCount(); j++)
+					for (int k = j; k==j; k++)
+				{
+					 strTables[i]->Cells[j][k] = "1";
+				}
+
+
+//------------------------- СРАВНЕНИЕ КРИТЕРИЕВ --------------------------------
+
+			//Создается таблица для сравнения критериев между собой
+				pageCriteria = new TTabSheet(pCtrl);
+				pageCriteria->Caption = "Сравнение Критериев";
+				pageCriteria->PageControl = pCtrl;
+
+				CriteriaTab = new TStringGrid(pageCriteria);
+				CriteriaTab->Left = 1;
+				CriteriaTab->Top = 1;
+				CriteriaTab->Width = pCtrl->Width-10;
+				CriteriaTab->Height = 145;
+				CriteriaTab->Visible = true;
+				CriteriaTab->ColCount = dft->getCriteriaCount() + 1; // матрица размером n на n
+				CriteriaTab->RowCount = dft->getCriteriaCount() + 1; // альтернатив
+				CriteriaTab->Options << goEditing;
+				CriteriaTab->OnKeyPress = tableKeyPress;
+				CriteriaTab->Parent = pageCriteria;
+
+	// Подписывает фиксированные ячейки
+		for (int j = 1; j <= dft->getCriteriaCount(); j++)
+		{
+				CriteriaTab->Cells[j][0] = dft->getCriteriaName(j-1);
+				CriteriaTab->Cells[0][j] = dft->getCriteriaName(j-1);
+		}
+
+	// Заполняет главную диагональ "1"
+			for (int j = 1; j <= dft->getCriteriaCount(); j++)
+				for (int k = j; k==j; k++)
+				{
+					 CriteriaTab->Cells[j][k] = "1";
+				}
+//------------------------------------------------------------------------------
+
+		pCtrl->ActivePageIndex = 0;
+		return true;
+}
+
+	void runCompute()
+	{
+		 computeMatrixForAlternatives();
+		 computeMatrixForCriteria();
+	}
+
+// расчет обратной матрицы
+// значения под главной диагональю
+bool computeMatrixForAlternatives()
+{
+String temp;
+for(int tab = 0; tab <  dft->getTableCount(); tab++)
+	for(int i = 1; i <= dft->getAlternativesCount(); i++)
+		for(int j = i; j <= dft->getAlternativesCount(); j++)
+			{
+				try
+				{
+					temp = strTables[tab]->Cells[j][i];
+
+					if(temp.Pos('/') != 0)
+					{
+						temp = strTables[tab]->Cells[j][i];
+						temp = temp.SubString(temp.Pos('/')+1, temp.Length());
+						strTables[tab]->Cells[i][j] = temp;
+					}
+					else
+					{
+					strTables[tab]->Cells[i][j] = valueInCell(temp);
+					}
+				}
+				catch(...)
+				{
+				String msg;
+				msg = "Внимание! Ошибка в таблице " + dft->getCriteriaName(tab);
+				MessageDlg(msg,mtInformation, TMsgDlgButtons() << mbNo << mbYes, 0);
+				pCtrl->ActivePageIndex = tab;
+				return false;
+				}
+			}
+	return true;
+}
+
+
+// Расчет обратной матрицы для таблицы Критерии
+bool computeMatrixForCriteria()
+{
+String temp;
+	for(int i = 1; i <= dft->getCriteriaCount(); i++)
+		for(int j = i; j <= dft->getCriteriaCount(); j++)
+			{
+				try
+				{
+					temp = CriteriaTab->Cells[j][i];
+
+					if(temp.Pos('/') != 0)
+					{
+						temp = CriteriaTab->Cells[j][i];
+						temp = temp.SubString(temp.Pos('/')+1, temp.Length());
+						CriteriaTab->Cells[i][j] = temp;
+					}
+					else
+					{
+					CriteriaTab->Cells[i][j] = valueInCell(temp);
+					}
+				}
+				catch(...)
+				{
+				String msg;
+				msg = "Внимание! Ошибка в таблице Сравнение Критериев";
+				MessageDlg(msg,mtInformation, TMsgDlgButtons() << mbOK, 0);
+				pCtrl->ActivePageIndex = pCtrl->PageCount - 1;
+				return false;
+				}
+			}
+	return true;
+}
+
+// Вычисляет значение в ячейке
+	String valueInCell(String str)
+	{
+
+		return FloatToStr(1.0 / StrToFloat(str));
+	}
+
+private:
+	 TTabSheet **pages;
+	 TStringGrid **strTables;
+
+	 // Для таблицы критериев
+	 TStringGrid *CriteriaTab;
+	 TTabSheet *pageCriteria;
+
+	 DataForTabels *dft;
+	 TPageControl *pCtrl;
+};
+
+#endif

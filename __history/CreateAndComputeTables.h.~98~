@@ -1,0 +1,601 @@
+#ifndef CREATEANDCOMPUTETABLES_H
+#define CREATEANDCOMPUTETABLES_H
+
+#include "DataForTabels.h"
+
+
+//Класс Создает таблицы и размещает их в PageControl
+class CreateAndComputeTables
+{
+public:
+	friend class DataForTabels;
+
+	CreateAndComputeTables();
+   /*	{
+	 pages = 0;
+	 strTables = 0;
+
+	 // Для таблицы критериев
+	CriteriaTab = 0;
+	pageCriteria = 0;
+
+	 dft = 0;
+	 pCtrl = 0;
+
+	 outRezult = 0;
+	 pageResult = 0;
+
+	} */
+
+	~CreateAndComputeTables();
+	 /*{
+			if(strTables != 0)
+			for(int i = 0; i < dft->getTableCount(); i++)
+				delete strTables[i];
+
+			if(pages != 0)
+			for(int i = 0; i < dft->getTableCount(); i++)
+				delete pages[i];
+
+			if(CriteriaTab != 0)
+			delete CriteriaTab;
+
+			if(pageCriteria != 0)
+			delete pageCriteria;
+
+			if(outRezult != 0)
+			delete outRezult;
+
+			if(pageResult != 0)
+			delete pageResult;
+	 }*/
+
+
+// Нажатие клавиши в Таблице
+void __fastcall tableKeyPress(TObject *Sender, System::WideChar &Key);
+	 /*{
+		   if ((Key>='0')&&(Key<='9')) {;} // цифры
+		   else if (Key==8) {} // <-
+		   else
+			if ((Key=='/'))
+			{
+				Key = '/';
+			}
+			else Key = 0; // не цифра
+	 } */
+
+// Нажатие клавиши в Edit
+void __fastcall EditKeyPress(TObject *Sender, System::WideChar &Key);
+	 /*{
+		   if ((Key>='0')&&(Key<='9')) {;} // цифры
+		   else if (Key==8) {} // <-
+		   else
+			if ((Key=='/'))
+			{
+				Key = '/';
+			}
+			else Key = 0; // не цифра
+	 } */
+
+// Создать таблицы
+bool createTables(DataForTabels *dft, TPageControl *pctrl);
+/*{
+			this->dft = dft;
+			pCtrl = pctrl;
+			strTables = new TStringGrid * [dft->getTableCount()];
+			pages = new TTabSheet * [dft->getTableCount()];
+
+//---------------------    СРАВНЕНИЕ АЛЬТЕРНАТИВ     ---------------------------
+
+			// Создаются таблицы для сравнения альтернатив по критерию
+			for(int i = 0; i < (dft->getTableCount()); i++)
+			{
+				pages[i] = new TTabSheet(pCtrl);
+				pages[i]->Caption = "Сравнение по критерию \"" + dft->getCriteriaName(i) + "\"";
+				pages[i]->PageControl = pCtrl;
+
+				strTables[i] = new TStringGrid(pages[i]);
+				strTables[i]->Left = 1;
+				strTables[i]->Top = 1;
+				strTables[i]->Width = pCtrl->Width-10;
+				strTables[i]->Height = 145;
+				strTables[i]->TabOrder = pCtrl->TabOrder  + i;
+				strTables[i]->Visible = true;
+				strTables[i]->ColCount = dft->getAlternativesCount() + 1; // матрица размером n на n
+				strTables[i]->RowCount = dft->getAlternativesCount() + 1; // альтернатив
+				strTables[i]->Options << goEditing;
+				strTables[i]->OnKeyPress = tableKeyPress;
+				strTables[i]->Parent = pages[i];
+			}
+
+			// Подпись фиксированых ячеек для таблиц "Сравнение по критерию"
+			// название альтернатив
+			for(int i = 0; i < dft->getTableCount(); i++){
+				for (int j = 1; j <= dft->getAlternativesCount(); j++)
+				{
+					 strTables[i]->Cells[j][0] = dft->getAlternativesName(j-1);
+					 strTables[i]->Cells[0][j] = dft->getAlternativesName(j-1);
+				}
+			}
+
+			// Заполнить главные диагонали матриц единицами "1"
+			for(int i = 0; i < dft->getTableCount(); i++)
+				for (int j = 1; j <= dft->getAlternativesCount(); j++)
+					for (int k = j; k==j; k++)
+				{
+					 strTables[i]->Cells[j][k] = "1";
+				}
+
+
+//------------------------- СРАВНЕНИЕ КРИТЕРИЕВ --------------------------------
+
+			//Создается таблица для сравнения критериев между собой
+				pageCriteria = new TTabSheet(pCtrl);
+				pageCriteria->Caption = "Сравнение Критериев";
+				pageCriteria->PageControl = pCtrl;
+
+				CriteriaTab = new TStringGrid(pageCriteria);
+				CriteriaTab->Left = 1;
+				CriteriaTab->Top = 1;
+				CriteriaTab->Width = pCtrl->Width-10;
+				CriteriaTab->Height = 145;
+				CriteriaTab->Visible = true;
+				CriteriaTab->ColCount = dft->getCriteriaCount() + 1; // матрица размером n на n
+				CriteriaTab->RowCount = dft->getCriteriaCount() + 1; // альтернатив
+				CriteriaTab->Options << goEditing;
+				CriteriaTab->OnKeyPress = tableKeyPress;
+				CriteriaTab->Parent = pageCriteria;
+
+	// Подписывает фиксированные ячейки
+		for (int j = 1; j <= dft->getCriteriaCount(); j++)
+		{
+				CriteriaTab->Cells[j][0] = dft->getCriteriaName(j-1);
+				CriteriaTab->Cells[0][j] = dft->getCriteriaName(j-1);
+		}
+
+	// Заполняет главную диагональ "1"
+			for (int j = 1; j <= dft->getCriteriaCount(); j++)
+				for (int k = j; k==j; k++)
+				{
+					 CriteriaTab->Cells[j][k] = "1";
+				}
+//------------------------------------------------------------------------------
+
+//---------------------------- Контрольные Вопросы -----------------------------
+
+		 pageCtrlQuest = new TTabSheet(pCtrl);
+		 pageCtrlQuest->Caption = "Контрольные вопросы";
+		 pageCtrlQuest->PageControl = pCtrl;
+
+		 TScrollBox *scrBox;
+		 scrBox = new TScrollBox(pageCtrlQuest);
+		 scrBox->Parent = pageCtrlQuest;
+		 scrBox->Height = pageCtrlQuest->Height - 5;
+		 scrBox->Width = pageCtrlQuest->Width - 5;
+
+		 edit = new TEdit * [dft->getCriteriaCount()];
+		 lblControlQ = new TLabel * [dft->getCriteriaCount()];
+
+		 srand(time(NULL));
+
+
+
+		 int top = 1, left = 1;
+		 int index_j, index_i;
+
+
+		 for(int i = 0; i < dft->getCriteriaCount(); i++)
+			{
+
+				for(;;)
+				{
+					index_j = rand() % dft->getAlternativesCount() + 1;
+					index_i = rand() % dft->getAlternativesCount() + 1;
+
+					if (index_j > index_i)
+					{
+						factorIndex.push_back(index_i);
+						factorIndex.push_back(index_j);
+						break;
+					}
+				}
+
+				lblControlQ[i] = new TLabel(scrBox);
+				lblControlQ[i]->Alignment= taCenter;
+
+				lblControlQ[i]->Caption =
+					"Сравнение по критреию \""
+					+ dft->getCriteriaName(i) + "\". "
+					+ dft->getAlternativesName(index_i-1)
+					+ "-"
+					+ dft->getAlternativesName(index_j-1);
+				lblControlQ[i]->AutoSize = true;
+
+				lblControlQ[i]->Width = 160;
+				lblControlQ[i]->Height = 40;
+				lblControlQ[i]->WordWrap = false;
+				lblControlQ[i]->Parent = scrBox;
+				lblControlQ[i]->Left = left;
+				lblControlQ[i]->Top = top;
+
+				edit[i] = new TEdit(scrBox);
+				edit[i]->Width = 30;
+				edit[i]->Height = 21;
+				edit[i]->Top = top;
+				edit[i]->Left = lblControlQ[i]->Width + 25;
+				edit[i]->Parent = scrBox;
+				edit[i]->OnKeyPress = EditKeyPress;
+				top += 30;
+			}
+
+		pCtrl->ActivePageIndex = 0;
+		return true;
+} */
+
+double getFactor();// {return totalFactor;}
+
+
+void runCompute();
+/*{
+		computeMatrix();
+
+		 computeVectors();
+		 computeWeight();
+		 computeGlobalVector();
+		 //computeResult();
+
+		 outResult(pCtrl);
+} */
+
+bool computeMatrix();
+/*{
+	try
+	{
+	computeMatrixForAlternatives();
+	computeMatrixForCriteria();
+	computeFactor();
+	}
+	catch(...)
+	{
+		return false;
+	}
+	return true;
+}*/
+
+bool computeFactor();
+/*{
+	String temp_str;
+	double Aji, Aij, Vk = 0;
+	int k = 0;
+
+		for(int i = 0; i < dft->getCriteriaCount(); i++)
+			{
+				try
+				{
+					temp_str = (String)edit[i]->Text;
+
+					if(temp_str.Pos('/') != 0)
+					{
+						Aji = StrToFloat(valueInCell( temp_str.SubString(temp_str.Pos('/')+1, temp_str.Length())));
+						//temp = temp.SubString(temp.Pos('/')+1, temp.Length());
+						//strTables[tab]->Cells[i][j] = temp;
+					}
+					else
+					{
+						Aji = StrToFloat(valueInCell(temp_str));
+					}
+
+					Aij = StrToFloat(strTables[i]->Cells[factorIndex[k+1]][factorIndex[k]]);
+
+				 if((Aji > 1.0f && Aij > 1.0f) || (Aji < 1.0f && Aij< 1.0f))
+				   {
+					  factorCoefficient.push_back(0.0f);
+				   }
+				   else
+				   {
+					   Vk += 1.0f - ( fabs(Aij - (1.0f / Aji)) / max(Aij, 1.0f / Aji));
+				   }
+
+					k+2;
+				}
+				catch(...)
+				{
+				String msg;
+				msg = "Внимание! Ошибка в Контрольный вопросах ";
+				MessageDlg(msg, mtInformation, TMsgDlgButtons() << mbOK, 0);
+				pCtrl->ActivePageIndex = pCtrl->PageCount - 1;
+				return false;
+				}
+			}
+
+			totalFactor = (Vk / dft->getCriteriaCount()) * 100.0f;
+
+	return true;
+}*/
+
+// расчет обратной матрицы значения под главной диагональю
+bool computeMatrixForAlternatives();
+/*{
+String temp;
+for(int tab = 0; tab <  dft->getTableCount(); tab++)
+	for(int i = 1; i <= dft->getAlternativesCount(); i++)
+		for(int j = i; j <= dft->getAlternativesCount(); j++)
+			{
+				try
+				{
+					temp = strTables[tab]->Cells[j][i];
+
+					if(temp.Pos('/') != 0)
+					{
+						strTables[tab]->Cells[j][i] = valueInCell( temp.SubString(temp.Pos('/')+1, temp.Length()) );
+						temp = temp.SubString(temp.Pos('/')+1, temp.Length());
+						strTables[tab]->Cells[i][j] = temp;
+					}
+					else
+					{
+					strTables[tab]->Cells[i][j] = valueInCell(temp);
+					}
+				}
+				catch(...)
+				{
+				String msg;
+				msg = "Внимание! Ошибка в таблице " + dft->getCriteriaName(tab);
+				MessageDlg(msg,mtInformation, TMsgDlgButtons() << mbOK, 0);
+				pCtrl->ActivePageIndex = tab;
+				return false;
+				}
+			}
+	return true;
+}*/
+
+
+// Расчет обратной матрицы для таблицы Критерии
+bool computeMatrixForCriteria();
+/*{
+String temp;
+	for(int i = 1; i <= dft->getCriteriaCount(); i++)
+		for(int j = i; j <= dft->getCriteriaCount(); j++)
+			{
+				try
+				{
+					temp = CriteriaTab->Cells[j][i];
+
+					if(temp.Pos('/') != 0)
+					{
+						CriteriaTab->Cells[j][i] = valueInCell( temp.SubString(temp.Pos('/')+1, temp.Length()) );
+						temp = temp.SubString(temp.Pos('/')+1, temp.Length());
+						CriteriaTab->Cells[i][j] = temp;
+					}
+					else
+					{
+					CriteriaTab->Cells[i][j] = valueInCell(temp);
+					}
+				}
+				catch(...)
+				{
+				String msg;
+				msg = "Внимание! Ошибка в таблице Сравнение Критериев";
+				MessageDlg(msg,mtInformation, TMsgDlgButtons() << mbOK, 0);
+				pCtrl->ActivePageIndex = pCtrl->PageCount - 2;
+				return false;
+				}
+			}
+
+	computeFactor();
+	return true;
+}*/
+
+
+// Вычисляет значение в ячейке
+String valueInCell(String str); //{return FloatToStr(1.0 / StrToFloat(str));}
+
+
+void computeVectors();
+/*{
+//------------------------------------------------------------------------------
+	// Вектора для таблицы Альтернатив
+	double res = 0, temp = 1;
+
+	for(int tab = 0; tab < dft->getTableCount(); tab++)
+		for(int i = 1; i <= dft->getAlternativesCount(); i++)
+		{
+			 for(int j = 1; j <= dft->getAlternativesCount(); j++)
+				{
+				   temp *= StrToFloat(strTables[tab]->Cells[j][i]);
+				}
+					res = pow(temp, 1.0 / (double)dft->getAlternativesCount());
+					VectorsAlternatives.push_back(res);
+					temp = 1;
+		}
+
+	// Ветор для таблицы Критерии
+		for(int i = 1; i <= dft->getCriteriaCount(); i++)
+		{
+			 for(int j = 1; j <= dft->getCriteriaCount(); j++)
+				{
+				   temp *= StrToFloat(CriteriaTab->Cells[j][i]);
+				}
+					res = pow(temp, 1.0 / (double)dft->getCriteriaCount());
+					VectorCriterias.push_back(res);
+					temp = 1;
+		}
+} */
+
+
+void computeWeight();
+/*{
+//-------------------     ВЕС ДЛЯ ТАБЛИЦ       ------------------------------
+
+		// Альтернативы
+		double summa, temp;
+		int k = 0; // Для нахождения суммы каждой таблицы (вестор столбец)
+		int t = 0; // Для нахождения нужного вектора для деления
+
+		//Вес для таблиц альтернатив
+		for(int i = 0; i < VectorsAlternatives.size(); i+=dft->getAlternativesCount())
+		{
+			for(int j = 0; j < dft->getAlternativesCount(); j++)
+			{
+				 summa += VectorsAlternatives[k];
+				 k++;
+			}
+
+			for(int l = 0; l < dft->getAlternativesCount(); l++)
+			{
+				temp = VectorsAlternatives[t] / summa;
+				WeightAlternatives.push_back(temp);
+				t++;
+			}
+			summa=0;
+		}
+
+		k = 0;
+		t = 0;
+		summa = 0;
+		//Вес для таблиц Критерии
+		for(int i = 0; i < VectorCriterias.size(); i+=dft->getCriteriaCount())
+		{
+			for(int j = 0; j < dft->getCriteriaCount(); j++)
+			{
+				 summa += VectorCriterias[k];
+				 k++;
+			}
+
+			for(int l = 0; l < dft->getCriteriaCount(); l++)
+			{
+				temp = VectorCriterias[t] / summa;
+				WeightCriterias.push_back(temp);
+				t++;
+			}
+			summa=0;
+		}
+//------------------------------------------------------------------------------
+}  */
+
+
+void  computeGlobalVector();
+/*{
+	double temp = 0;
+	int k = 0;
+	for(int i = 0; i < dft->getAlternativesCount(); i++)
+	{
+		for(int j = 0; j < dft->getCriteriaCount(); j++)
+		{
+			double a;
+			double b;
+			a = WeightCriterias[j];
+			b = WeightAlternatives[k];
+			 temp +=  a * b;
+			 k+=3;
+		}
+		globalVectors.push_back(temp);
+		temp = 0;
+		k = i+1;
+	}
+} */
+
+
+void outResult(TPageControl *pCtrl);
+/*{
+
+	pageResult = new TTabSheet(pCtrl);
+	pageResult->Caption = "Результат";
+	pageResult->PageControl = pCtrl;
+
+	outRezult = new TMemo(pCtrl);
+	outRezult->Width = pCtrl->Width - 10;
+	outRezult->Height  = 145;
+	outRezult->ScrollBars = ssVertical;
+	outRezult->Parent = pageResult;
+
+	double max = globalVectors[0], value;
+	short index = 0;
+
+	TVarRec args[1];
+	String format;
+
+	outRezult->Lines->Add("\nАльтернативы:\n");
+	for(int i = 0; i < dft->getAlternativesCount(); i++)
+	{
+		value = globalVectors[i] * 100.0f;
+		args[0] = value;
+
+		format = format.Format("%.2f", &args[0], 0);
+
+		if(globalVectors[i] > max)
+		{
+			max = globalVectors[i];
+			index = i;
+		}
+
+		outRezult->Lines->Add(dft->getAlternativesName(i) + " = " + format + "%");
+		//
+	}
+
+	outRezult->Lines->Add("\n");
+	outRezult->Lines->Add("Лучшая альтернатива");
+
+	args[0] = max * 100.0f;
+	format = format.Format("%.2f", &args[0], 0);
+
+	outRezult->Lines->Add(dft->getAlternativesName(index) + " = " + format + "%\n");
+
+	outRezult->Lines->Add("\n");
+	outRezult->Lines->Add("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+	outRezult->Lines->Add("КОЭФФИЦИЕНТ ДОВЕРИЯ К ЭКСПЕРТУ");
+	args[0] = totalFactor;
+	format = format.Format("%.2f", &args[0], 0);
+	outRezult->Lines->Add(format + "%");
+	outRezult->Lines->Add("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+	pCtrl->ActivePageIndex = pCtrl->PageCount - 1;
+
+	//Form1->Label4->Color = clGreen;
+}*/
+
+ /*
+void SaveToFile(TSaveDialog *SaveDlg)
+{
+
+}
+
+
+void LoadFormFile(TOpenDialog *OpnDlg)
+{
+
+} */
+
+//------------------------------------------------------------------------------
+private:
+	 TTabSheet **pages;
+	 TStringGrid **strTables;
+
+	 // Для таблицы критериев
+	 TStringGrid *CriteriaTab;
+	 TTabSheet *pageCriteria;
+
+	 DataForTabels *dft;
+	 TPageControl *pCtrl;
+
+	vector<double> VectorsAlternatives;
+	vector<double> VectorCriterias;
+
+	vector<double> WeightAlternatives;
+	vector<double> WeightCriterias;
+
+	vector<double> globalVectors;
+	vector<double> factorCoefficient;
+	vector<int> factorIndex;
+
+	double totalFactor;
+
+	TMemo *outRezult;
+	TTabSheet *pageResult;
+
+	// Для страницы "Контрольне вопросы"
+	TLabel **lblControlQ;
+	TTabSheet *pageCtrlQuest;
+	TEdit **edit;
+};
+
+#endif

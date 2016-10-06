@@ -1,0 +1,56 @@
+object Form2: TForm2
+  Left = 0
+  Top = 0
+  Caption = #1054' '#1087#1088#1086#1075#1088#1072#1084#1084#1077
+  ClientHeight = 259
+  ClientWidth = 499
+  Color = clWhite
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Label1: TLabel
+    Left = 121
+    Top = 80
+    Width = 257
+    Height = 25
+    Alignment = taCenter
+    AutoSize = False
+    Caption = #169' 2014 '#1041#1072#1083#1086#1073#1072#1085#1086#1074' '#1044#1077#1085#1080#1089
+    Color = clWhite
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clBlack
+    Font.Height = -19
+    Font.Name = 'Times New Roman'
+    Font.Style = [fsUnderline]
+    ParentColor = False
+    ParentFont = False
+    WordWrap = True
+  end
+  object Label2: TLabel
+    Left = 144
+    Top = 8
+    Width = 194
+    Height = 21
+    Caption = #1052#1040#1048' '#1074#1077#1088#1089#1080#1103' 1.00.00.000'
+    Font.Charset = RUSSIAN_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -19
+    Font.Name = 'Times New Roman'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 152
+    Top = 176
+    Width = 137
+    Height = 41
+    Caption = 'Label3'
+  end
+end
